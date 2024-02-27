@@ -1,0 +1,66 @@
+#set( $glossary = {"0000" : "...."} )
+#set( $file = $fn.file('TelosysTools/templates/plantuml/glossary.vm') )
+#if($file.exists())#parse("glossary.vm")#end
+#set( $glossaryListTmp = [] )
+#set( $z = "")
+##
+#macro(checkGlossary $dbName)
+#foreach(${key} in ${dbName.split("_")} )
+#set( $z = ${glossary.getOrDefault(${key},"")} )
+#if($z == "")❌#else✅#end
+#end
+#end
+##
+#macro ( setFromGlossary $key $type)
+#if($type == 'capitalize')
+    #set( $z = $glossaryListTmp.add(
+        ${fn.capitalize(
+            ${fn.toLowerCase(
+                ${glossary.getOrDefault(
+                    ${key},${key}
+                )}
+            )}
+        )}
+    ))
+#elseif($type == 'lowercase')
+    #set( $z = $glossaryListTmp.add(
+        ${fn.toLowerCase(
+            ${glossary.getOrDefault(
+                ${key},${key}
+            )}
+        )}
+    ))
+#elseif($type == 'uppercase')
+    #set( $z = $glossaryListTmp.add(
+        ${fn.toUpperCase(
+            ${glossary.getOrDefault(
+                ${key},${key}
+            )}
+        )}
+    ))
+#else
+    #set( $z = $glossaryListTmp.add(${glossary.getOrDefault(${key},${key})}))
+#end
+#end
+##
+#macro ( glossaryGlue $dbName $glue $type )
+    #set( $glossaryListTmp = [] )
+#foreach(${splittedString} in ${dbName.split("_")} )#setFromGlossary(${splittedString} $type)
+    #set( $z = $fn.join($glossaryListTmp, $glue ) )
+#end
+#end
+##
+#macro(glossaryCapitalize $dbName $glue)#glossaryGlue(${dbName} $glue "capitalize" )${z}#end
+##
+#macro(glossaryLowercase $dbName $glue)#glossaryGlue(${dbName} $glue "lowercase" )${z}#end
+##
+#macro(glossaryUppercase $dbName $glue)#glossaryGlue(${dbName} $glue "uppercase" )${z}#end
+##
+#macro(glossary $dbName $glue)#glossaryGlue(${dbName} $glue "" )${z}#end
+##
+#macro(glossaryBean $dbName )#glossaryGlue(${dbName} "" "capitalize" )${z}#end
+##
+#macro(glossaryField $dbName )#glossaryGlue(${dbName} "" "capitalize")${fn.uncapitalize(${z})}#end
+##
+#macro(glossaryName $dbName )#glossaryGlue(${dbName} " " "capitalize" )${z}#end
+##

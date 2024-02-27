@@ -1,17 +1,43 @@
 #checkId($entity)
+#parse("glossary_macro.vm")
+# [entities](../entities)
 
-Entity: **${entity.name}**
+
+Name: **#glossaryCapitalize(${entity.databaseTable} " ")**
+
+Bean: **#glossaryBean(${entity.databaseTable})**
 
 Table: **${entity.databaseTable}**
 
+---
+
+| DB Name | Field Name | Name | Glossary |
+|---|---|---|---|
+#foreach($field in ${entity.keyAttributes})
+| ${field.databaseName} | #glossaryField(${field.databaseName}) | #glossaryName(${field.databaseName}) | #checkGlossary(${field.databaseName}) |
+#end
+#foreach( $field in $entity.nonKeyAttributes )
+| ${field.databaseName} | #glossaryField(${field.databaseName}) | #glossaryName(${field.databaseName}) | #checkGlossary(${field.databaseName}) |
+#end
+---
+
+#macro ( drawSimpleEntityWithFk $entity)
+entity ${entity.databaseTable} {
+#foreach($field in ${entity.keyAttributes})
+    ${field.databaseName}
+#end
+}
+#end
 ```plantuml
 entity ${entity.databaseTable} {
 #foreach($field in ${entity.keyAttributes})
-  ${field.databaseName}: ${field.sqlColumnType} | ${field.name}
+    ${field.databaseName}: ${field.sqlColumnType} | #glossaryField(${field.databaseName})
 #end
+
 --
 #foreach( $field in $entity.nonKeyAttributes )
-  ${field.databaseName}: ${field.sqlColumnType} | ${field.name}
+    ${field.databaseName}: ${field.sqlColumnType} | #glossaryField(${field.databaseName})
+
 #end
 }
 ```
@@ -26,25 +52,46 @@ Direct relationships:
 #end
 
 ```plantuml
-entity ${entity.databaseTable} {
-#foreach($field in ${entity.keyAttributes})
-  ${field.databaseName}
-#end
-}
-
+#drawSimpleEntityWithFk(${entity})
 #foreach($reference in $entity.references )
-entity ${reference.entity.databaseTable} {
-#foreach($field in ${reference.entity.keyAttributes})
-  ${field.databaseName}
-#end
-}
+#drawSimpleEntityWithFk(${reference.entity})
 #end
 #foreach($reference in $entity.references )
 #if(${reference.toMany})
 ${entity.databaseTable} ||--|{ ${reference.entity.databaseTable}
+note right on link
+${entity.databaseTable}
+#foreach($fk in ${entity.databaseForeignKeys} )
+#foreach($attr in ${fk.attributes})
+  - ${attr.originAttribute.databaseName}
+#end
+#end
+
+#foreach($fk in ${reference.entity.databaseForeignKeys} )
+#foreach($attr in ${fk.attributes})
+  - ${attr.originAttribute.databaseName}
+#end
+#end
+${reference.entity.databaseTable}
+end note
 #end
 #if(${reference.toOne})
 ${entity.databaseTable}  }|--|| ${reference.entity.databaseTable}
+note right on link
+${entity.databaseTable}
+#foreach($fk in ${entity.databaseForeignKeys} )
+#foreach($attr in ${fk.attributes})
+  - ${attr.originAttribute.databaseName}
+#end
+#end
+
+#foreach($fk in ${reference.entity.databaseForeignKeys} )
+#foreach($attr in ${fk.attributes})
+  - ${attr.originAttribute.databaseName}
+#end
+#end
+${reference.entity.databaseTable}
+end note
 #end
 #end
 

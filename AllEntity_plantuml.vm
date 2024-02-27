@@ -1,7 +1,6 @@
-
-| DB Name | Bean Name |
-|---|---|
+#parse("glossary_macro.vm")
+| DB Name | Bean Name | Name | Glossary |
+|---|---|---|---|
 #foreach ( $entity in $model.allEntities )
-|  [${entity.databaseTable}](./entity/${entity.name}) | ${entity.name} |
+|  [${entity.databaseTable}](./entity/${entity.name}) | #glossaryBean(${entity.databaseTable}) | #glossaryName(${entity.databaseTable}) | #checkGlossary(${entity.databaseTable}) |
 #end
-
