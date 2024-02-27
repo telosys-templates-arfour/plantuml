@@ -1,0 +1,7 @@
+
+| DB Name | Bean Name |
+|---|---|
+#foreach ( $entity in $model.allEntities )
+|  [${entity.databaseTable}](./entity/${entity.name}) | ${entity.name} |
+#end
+

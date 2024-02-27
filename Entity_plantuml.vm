@@ -1,0 +1,52 @@
+#checkId($entity)
+
+Entity: **${entity.name}**
+
+Table: **${entity.databaseTable}**
+
+```plantuml
+entity ${entity.databaseTable} {
+#foreach($field in ${entity.keyAttributes})
+  ${field.databaseName}: ${field.sqlColumnType} | ${field.name}
+#end
+--
+#foreach( $field in $entity.nonKeyAttributes )
+  ${field.databaseName}: ${field.sqlColumnType} | ${field.name}
+#end
+}
+```
+
+#if(!${entity.references.isEmpty()})
+---
+
+Direct relationships:
+
+#foreach($reference in $entity.references )
+- [${reference.entity.databaseTable}](./${reference.entity.name})
+#end
+
+```plantuml
+entity ${entity.databaseTable} {
+#foreach($field in ${entity.keyAttributes})
+  ${field.databaseName}
+#end
+}
+
+#foreach($reference in $entity.references )
+entity ${reference.entity.databaseTable} {
+#foreach($field in ${reference.entity.keyAttributes})
+  ${field.databaseName}
+#end
+}
+#end
+#foreach($reference in $entity.references )
+#if(${reference.toMany})
+${entity.databaseTable} ||--|{ ${reference.entity.databaseTable}
+#end
+#if(${reference.toOne})
+${entity.databaseTable}  }|--|| ${reference.entity.databaseTable}
+#end
+#end
+
+```
+#end
